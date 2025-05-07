@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from .models import Country
 from .utils import api_response
 from django.http import HttpResponseNotAllowed, JsonResponse
@@ -144,3 +144,50 @@ def country_create_view(request):
     }
 
     return api_response("success", "Country created successfully", data, http_status=201)
+
+
+@csrf_exempt
+def country_update_view(request, id):
+    if request.method not in ['PUT', 'POST']:
+        return api_response("error", "Only PUT or POST allowed", None, http_status=405)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return api_response("error", "Invalid JSON", None, http_status=400)
+
+    country = get_object_or_404(Country, id=id)
+
+    # Update fields only if present in request
+    fields = [
+        "name", "official_name", "cca2", "languages", "capital", "population", "area",
+        "region", "subregion", "timezones", "currencies", "flags", "coat_of_arms", "flag"
+    ]
+    for field in fields:
+        if field in body:
+            setattr(country, field, body[field])
+
+    try:
+        country.save()
+    except Exception as e:
+        return api_response("error", f"Failed to update country: {str(e)}", None, http_status=500)
+
+    data = {
+        "id": country.id,
+        "name": country.name,
+        "official_name": country.official_name,
+        "cca2": country.cca2,
+        "languages": country.languages,
+        "capital": country.capital,
+        "population": country.population,
+        "area": country.area,
+        "region": country.region,
+        "subregion": country.subregion,
+        "timezones": country.timezones,
+        "currencies": country.currencies,
+        "flags": country.flags,
+        "coat_of_arms": country.coat_of_arms,
+        "flag": country.flag,
+    }
+
+    return api_response("success", "Country updated successfully", data, http_status=200)
