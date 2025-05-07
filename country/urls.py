@@ -6,6 +6,7 @@ from .views import (
     country_update_view,
     country_delete_view,
     same_region_countries_view,
+    countries_by_language_view
 )
 
 
@@ -16,4 +17,5 @@ urlpatterns = [
     path('update/<int:id>', country_update_view, name='country_update'),
     path('delete/<int:id>', country_delete_view, name='country_delete'),
     path('same-region-countries/<int:id>', same_region_countries_view, name='same_region_countries'),
+    path('countries-by-language', countries_by_language_view, name='countries_by_language'),
 ]

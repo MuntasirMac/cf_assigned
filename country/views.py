@@ -3,8 +3,9 @@ from .models import Country
 from .utils import api_response
 from django.http import HttpResponseNotAllowed, JsonResponse
 from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
-import json
+import json, re
 
 # Create your views here.
 def country_list(request):
@@ -241,3 +242,42 @@ def same_region_countries_view(request, id):
     ]
 
     return api_response("success", f"Countries in the same region as {target_country.name}", countries_data)
+
+
+def countries_by_language_view(request):
+    if request.method != 'GET':
+        return api_response("error", "Only GET allowed", None, http_status=405)
+
+    # Get language from query parameter
+    language = request.GET.get('language', None)
+
+    if not language:
+        return api_response("error", "Language query parameter is required", None, http_status=400)
+
+    # Case-insensitive regex search for countries that speak the given language
+    regex_pattern = f"(?i){re.escape(language)}"  # (?i) for case-insensitive matching
+    matching_countries = Country.objects.filter(
+        Q(languages__contains=[language]) | Q(languages__regex=regex_pattern)
+    )
+    # print(len(matching_countries))
+    countries_data = [
+        {
+            "id": country.id,
+            "name": country.name,
+            "official_name": country.official_name,
+            "cca2": country.cca2,
+            "languages": country.languages,
+            "capital": country.capital,
+            "population": country.population,
+            "region": country.region,
+            "subregion": country.subregion,
+            "timezones": country.timezones,
+            "currencies": country.currencies,
+            "flags": country.flags,
+            "coat_of_arms": country.coat_of_arms,
+            "flag": country.flag,
+        }
+        for country in matching_countries
+    ]
+
+    return api_response("success", f"Countries that speak {language}", countries_data)
