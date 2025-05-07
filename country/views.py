@@ -207,3 +207,37 @@ def country_delete_view(request, id):
         return api_response("error", f"Failed to delete country: {str(e)}", None, http_status=500)
 
     return api_response("success", f"Country with ID {id} deleted successfully", None, http_status=204)
+
+
+def same_region_countries_view(request, id):
+    if request.method != 'GET':
+        return api_response("error", "Only GET allowed", None, http_status=405)
+
+    # Get the target country
+    target_country = get_object_or_404(Country, id=id)
+
+    # Fetch countries in the same region, excluding the target country
+    same_region_countries = Country.objects.filter(region=target_country.region).exclude(id=id)
+
+    # Serialize the data
+    countries_data = [
+        {
+            "id": country.id,
+            "name": country.name,
+            "official_name": country.official_name,
+            "cca2": country.cca2,
+            "languages": country.languages,
+            "capital": country.capital,
+            "population": country.population,
+            "region": country.region,
+            "subregion": country.subregion,
+            "timezones": country.timezones,
+            "currencies": country.currencies,
+            "flags": country.flags,
+            "coat_of_arms": country.coat_of_arms,
+            "flag": country.flag,
+        }
+        for country in same_region_countries
+    ]
+
+    return api_response("success", f"Countries in the same region as {target_country.name}", countries_data)
