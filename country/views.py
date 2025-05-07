@@ -191,3 +191,19 @@ def country_update_view(request, id):
     }
 
     return api_response("success", "Country updated successfully", data, http_status=200)
+
+
+@csrf_exempt
+def country_delete_view(request, id):
+    if request.method != 'DELETE':
+        return api_response("error", "Only DELETE allowed", None, http_status=405)
+
+    # Get country by id
+    country = get_object_or_404(Country, id=id)
+
+    try:
+        country.delete()
+    except Exception as e:
+        return api_response("error", f"Failed to delete country: {str(e)}", None, http_status=500)
+
+    return api_response("success", f"Country with ID {id} deleted successfully", None, http_status=204)
