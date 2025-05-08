@@ -5,7 +5,7 @@ from django.http import HttpResponseNotAllowed, JsonResponse
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
-import json, re
+import json, re, templates
 
 # Create your views here.
 def country_list(request):
@@ -16,6 +16,9 @@ def country_list(request):
     page_size = request.GET.get('page_size', 25)
     countries = Country.objects.all().order_by('name')
     paginator = Paginator(countries, page_size)
+    query = request.GET.get('q', '')
+    if query:
+        countries = countries.filter(name__icontains=query)
 
     try:
         countries_page = paginator.page(page)
@@ -51,7 +54,12 @@ def country_list(request):
         "has_previous": countries_page.has_previous(),
         "data": country_data,
     }
-    return JsonResponse(response, status=200)
+    # return JsonResponse(response, status=200)
+    context = {
+        "countries": countries_page,
+        'query': query,
+    }
+    return render(request, "countries/list.html", context)
 
 def country_detail_view(request, id):
     if request.method != 'GET':
@@ -60,6 +68,10 @@ def country_detail_view(request, id):
     try:
         # id = int(id)
         country = Country.objects.filter(id=id).first()
+        same_region = Country.objects.filter(region=country.region).exclude(id=country.id)
+        same_language = Country.objects.filter(
+        languages__icontains=country.languages[0] if country.languages else ''
+    ).exclude(id=country.id)
     except Country.DoesNotExist:
         return JsonResponse({
             "status": "error",
@@ -84,11 +96,16 @@ def country_detail_view(request, id):
         "official_name": country.official_name,
     }
 
-    return JsonResponse({
-        "status": "success",
-        "message": f"Details of country '{country.name}'",
-        "data": data
-    }, status=200)
+    # return JsonResponse({
+    #     "status": "success",
+    #     "message": f"Details of country '{country.name}'",
+    #     "data": data
+    # }, status=200)
+    return render(request, 'countries/detail.html', {
+        'country': country,
+        'same_region': same_region,
+        'same_language': same_language,
+    })
 
 
 @csrf_exempt
