@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.decorators import login_required
 from .models import Country
 from .utils import api_response
 from django.http import HttpResponseNotAllowed, JsonResponse
@@ -8,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json, re, templates
 
 # Create your views here.
+@login_required
 def country_list(request):
     if request.method != 'GET':
         return JsonResponse({'error': 'Only GET is allowed'}, status=405)
@@ -61,6 +63,7 @@ def country_list(request):
     }
     return render(request, "countries/list.html", context)
 
+@login_required
 def country_detail_view(request, id):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
@@ -107,7 +110,7 @@ def country_detail_view(request, id):
         'same_language': same_language,
     })
 
-
+@login_required
 @csrf_exempt
 def country_create_view(request):
     if request.method != 'POST':
@@ -163,7 +166,7 @@ def country_create_view(request):
 
     return api_response("success", "Country created successfully", data, http_status=201)
 
-
+@login_required
 @csrf_exempt
 def country_update_view(request, id):
     if request.method not in ['PUT', 'POST']:
@@ -210,7 +213,7 @@ def country_update_view(request, id):
 
     return api_response("success", "Country updated successfully", data, http_status=200)
 
-
+@login_required
 @csrf_exempt
 def country_delete_view(request, id):
     if request.method != 'DELETE':
@@ -226,7 +229,7 @@ def country_delete_view(request, id):
 
     return api_response("success", f"Country with ID {id} deleted successfully", None, http_status=204)
 
-
+@login_required
 def same_region_countries_view(request, id):
     if request.method != 'GET':
         return api_response("error", "Only GET allowed", None, http_status=405)
@@ -260,7 +263,7 @@ def same_region_countries_view(request, id):
 
     return api_response("success", f"Countries in the same region as {target_country.name}", countries_data)
 
-
+@login_required
 def countries_by_language_view(request):
     if request.method != 'GET':
         return api_response("error", "Only GET allowed", None, http_status=405)
@@ -299,7 +302,7 @@ def countries_by_language_view(request):
 
     return api_response("success", f"Countries that speak {language}", countries_data)
 
-
+@login_required
 def search_country_by_name(request):
     if request.method != 'GET':
         return api_response("error", "Only GET method allowed", None, http_status=405)

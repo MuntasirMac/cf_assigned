@@ -54,6 +54,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'Main.urls'
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/countries/'
+LOGOUT_REDIRECT_URL = '/login'
+LOGOUT_URL = '/logout'
 
 TEMPLATES = [
     {
@@ -69,6 +73,10 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+TEMPLATES[0]['OPTIONS']['context_processors'] += [
+    'django.contrib.auth.context_processors.auth',
 ]
 
 WSGI_APPLICATION = 'Main.wsgi.application'
