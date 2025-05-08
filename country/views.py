@@ -17,10 +17,10 @@ def country_list(request):
     page = request.GET.get('page', 1)
     page_size = request.GET.get('page_size', 25)
     countries = Country.objects.all().order_by('name')
-    paginator = Paginator(countries, page_size)
     query = request.GET.get('q', '')
     if query:
-        countries = countries.filter(name__icontains=query)
+        countries = Country.objects.filter(name__icontains=query)
+    paginator = Paginator(countries, page_size)
 
     try:
         countries_page = paginator.page(page)

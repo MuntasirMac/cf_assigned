@@ -44,7 +44,7 @@ pip install -r requirements.txt
 ### 3. Setup The Database
 - Create a file named `.env`
 - Copy and paste the text from the file `env_example` to `.env`
-- Now, following the instructions, enter your db name, db pass, db host an db port
+- Now, following the instructions, enter your db name, db pass, db host an db port and save the `.env` file.
 
 ### 4. Run Migrations
 ```bash
@@ -57,7 +57,11 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Visit: http://localhost:8000/countries/list
+- Visit: http://localhost:8000/api/v1/countries/list
+
+- In case you can't see the page, sign up or login.
+    - Visit http://localhost:8000/api/v1/signup or
+    - Visit http://localhost:8000/api/v1/login
 
 ---
 
