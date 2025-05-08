@@ -281,3 +281,37 @@ def countries_by_language_view(request):
     ]
 
     return api_response("success", f"Countries that speak {language}", countries_data)
+
+
+def search_country_by_name(request):
+    if request.method != 'GET':
+        return api_response("error", "Only GET method allowed", None, http_status=405)
+
+    name_query = request.GET.get('name', '').strip()
+
+    if not name_query:
+        return api_response("error", "Query parameter 'name' is required", None, http_status=400)
+
+    countries = Country.objects.filter(name__icontains=name_query)
+
+    country_data = [
+        {
+            "id": country.id,
+            "name": country.name,
+            "official_name": country.official_name,
+            "cca2": country.cca2,
+            "languages": country.languages,
+            "capital": country.capital,
+            "population": country.population,
+            "region": country.region,
+            "subregion": country.subregion,
+            "timezones": country.timezones,
+            "currencies": country.currencies,
+            "flags": country.flags,
+            "coat_of_arms": country.coat_of_arms,
+            "flag": country.flag,
+        }
+        for country in countries
+    ]
+
+    return api_response("success", f"Found {len(country_data)} matching countries", country_data)
