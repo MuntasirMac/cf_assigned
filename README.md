@@ -52,7 +52,12 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 5. Run The Development Server
+### 5. Populate The Database
+```
+python manage.py fetch_countries
+```
+
+### 6. Run The Development Server
 ```bash
 python manage.py runserver
 ```
